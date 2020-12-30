@@ -1,0 +1,67 @@
+---
+- name: 'Provision Image'
+  hosts: default
+  become: true
+
+  tasks:
+    - name: set tz
+      timezone:
+        name: America/Detroit
+      become: yes
+    - name: Set default locale
+      locale_gen:
+          name: en_US.UTF-8
+          state: present
+    - name: set hostname
+      hostname:
+        name: "{{ hostname }}"
+    - name: upgrade pkgs
+      apt:
+        name: '*'
+        state: latest
+        autoremove: yes
+        update_cache: yes
+      become: yes
+    - name: install bare mins
+      apt:
+        pkg:
+          - htop
+          - iotop
+          - iftop
+          - wget
+          - curl
+          - zsh
+          - git
+          - mtr
+          - vim-nox
+          - tree
+          - screen
+          - nmap
+          - multitail
+          - colordiff
+          - net-tools
+          - unzip
+          - pigz
+          - python3-pip
+          - pipenv
+          - bash-completion
+          - zsh-autosuggestions
+          - zsh-syntax-highlighting
+          - fzf
+        state: present
+      tags:
+        - packages
+    - name: Create jarnet user
+      user:
+        name: jarnet
+        state: present
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        password: "$6$3k.AlSLGyPsRHipX$Ox3AT4azEgMV5SLpbpvUDRm5LAMPthJPPXVhnyELLFOVC2uYu.3SwHR5opCbPJFAEyPEVDspC/CW3o4E6DbOF1"
+    - name: auth key for jarnet user
+      authorized_key:
+        user: jarnet
+        state: present
+        key: https://github.com/joearnet.keys
+        comment: "jarnet@gmail.com"
